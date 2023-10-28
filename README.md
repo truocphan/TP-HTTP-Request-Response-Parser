@@ -1,13 +1,13 @@
-# TP_HTTP_Request_Response_Parser
+# TP-HTTP-Request-Response-Parser
 
 <p align="center">
-    <a href="https://github.com/truocphan/TP_HTTP_Request_Response_Parser/releases/"><img src="https://img.shields.io/github/release/truocphan/TP_HTTP_Request_Response_Parser" height=30></a>
-	<a href="#"><img src="https://img.shields.io/github/downloads/truocphan/TP_HTTP_Request_Response_Parser/total" height=30></a>
-	<a href="#"><img src="https://img.shields.io/github/stars/truocphan/TP_HTTP_Request_Response_Parser" height=30></a>
-	<a href="#"><img src="https://img.shields.io/github/forks/truocphan/TP_HTTP_Request_Response_Parser" height=30></a>
-	<a href="https://github.com/truocphan/TP_HTTP_Request_Response_Parser/issues?q=is%3Aopen+is%3Aissue"><img src="https://img.shields.io/github/issues/truocphan/TP_HTTP_Request_Response_Parser" height=30></a>
-	<a href="https://github.com/truocphan/TP_HTTP_Request_Response_Parser/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/truocphan/TP_HTTP_Request_Response_Parser" height=30></a>
-	<a href="https://pypi.org/project/TP_HTTP_Request_Response_Parser/" target="_blank"><img src="https://img.shields.io/badge/pypi-3775A9?style=for-the-badge&logo=pypi&logoColor=white" height=30></a>
+    <a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/releases/"><img src="https://img.shields.io/github/release/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="#"><img src="https://img.shields.io/github/downloads/truocphan/TP-HTTP-Request-Response-Parser/total" height=30></a>
+	<a href="#"><img src="https://img.shields.io/github/stars/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="#"><img src="https://img.shields.io/github/forks/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/issues?q=is%3Aopen+is%3Aissue"><img src="https://img.shields.io/github/issues/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="https://pypi.org/project/TP-HTTP-Request-Response-Parser/" target="_blank"><img src="https://img.shields.io/badge/pypi-3775A9?style=for-the-badge&logo=pypi&logoColor=white" height=30></a>
 	<a href="https://www.facebook.com/292706121240740" target="_blank"><img src="https://img.shields.io/badge/Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white" height=30></a>
 	<a href="https://twitter.com/truocphan" target="_blank"><img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" height=30></a>
 	<a href="https://github.com/truocphan" target="_blank"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" height=30></a>
@@ -28,17 +28,16 @@ User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
 Connection: close
 Cache-Control: max-age=0
 
-
 """
 
 RequestParser = TP_HTTP_REQUEST_PARSER(rawRequest)
 
-print(RequestParser.request_method)
-print(RequestParser.request_path)
-print(RequestParser.request_query)
-print(RequestParser.request_fragment)
-print(RequestParser.request_headers.getObject())
-print(RequestParser.request_body)
+print("- request_method:", RequestParser.request_method)
+print("- request_path:", RequestParser.request_path)
+print("- request_query:", RequestParser.request_query.dumps(indent=4))
+print("- request_fragment:", RequestParser.request_fragment)
+print("- request_headers:", RequestParser.request_headers.dumps(indent=4))
+print("- request_body:", RequestParser.request_body)
 
 
 
@@ -58,13 +57,12 @@ Via: 1.1 19175f36fb9c16ba394561bae28598da.cloudfront.net (CloudFront)
 X-Amz-Cf-Pop: SGN50-P2
 X-Amz-Cf-Id: eKssgTNGDCswPiQtSYFD1MRNBJCTHEbnQp4MQjtQx2B4eM7oqXYIHg==
 
-{"ok":true,"promo":[]}
-"""
+{"ok":true,"promo":[]}"""
 
 ResponseParser = TP_HTTP_RESPONSE_PARSER(rawResponse)
 
-print(ResponseParser.status_code)
-print(ResponseParser.status_text)
-print(ResponseParser.response_headers.getObject())
-print(ResponseParser.response_body)
+print("- status_code:", ResponseParser.status_code)
+print("- status_text:", ResponseParser.status_text)
+print("- response_headers:", ResponseParser.response_headers.dumps(indent=4))
+print("- response_body:", ResponseParser.response_body)
 ```

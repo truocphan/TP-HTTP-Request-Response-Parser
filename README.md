@@ -30,14 +30,15 @@ Cache-Control: max-age=0
 
 """
 
-RequestParser = TP_HTTP_REQUEST_PARSER(rawRequest)
+# RequestParser = TP_HTTP_REQUEST_PARSER(open("request.txt", encoding="utf-8", errors="ignore").read())
+RequestParser = TP_HTTP_REQUEST_PARSER(rawRequest, ordered_dict=True)
 
 print("- request_method:", RequestParser.request_method)
 print("- request_path:", RequestParser.request_path)
 print("- request_query:", RequestParser.request_query.dumps(indent=4))
 print("- request_fragment:", RequestParser.request_fragment)
 print("- request_headers:", RequestParser.request_headers.dumps(indent=4))
-print("- request_body:", RequestParser.request_body)
+print("- request_body:", RequestParser.request_body.dumps(indent=4))
 
 
 
@@ -59,10 +60,11 @@ X-Amz-Cf-Id: eKssgTNGDCswPiQtSYFD1MRNBJCTHEbnQp4MQjtQx2B4eM7oqXYIHg==
 
 {"ok":true,"promo":[]}"""
 
-ResponseParser = TP_HTTP_RESPONSE_PARSER(rawResponse)
+# ResponseParser = TP_HTTP_RESPONSE_PARSER(open("response.txt", encoding="utf-8", errors="ignore").read())
+ResponseParser = TP_HTTP_RESPONSE_PARSER(rawResponse, ordered_dict=True)
 
-print("- status_code:", ResponseParser.status_code)
-print("- status_text:", ResponseParser.status_text)
+print("- response_statusCode:", ResponseParser.response_statusCode)
+print("- response_statusText:", ResponseParser.response_statusText)
 print("- response_headers:", ResponseParser.response_headers.dumps(indent=4))
-print("- response_body:", ResponseParser.response_body)
+print("- response_body:", ResponseParser.response_body.dumps(indent=4))
 ```

@@ -2,7 +2,12 @@ class TP_HTTP_REQUEST_PARSER:
 	def __init__(self, rawRequest, ordered_dict=False):
 		import json_duplicate_keys as jdks
 		import re
-		from urllib.parse import urlparse
+		import platform
+
+		if platform.python_version_tuple()[0] == "3":
+			from urllib.parse import urlparse
+		else:
+			from urlparse import urlparse
 
 		## Request Method ##
 		try:
@@ -85,7 +90,10 @@ class TP_HTTP_REQUEST_PARSER:
 								result = re.findall("^Content-Disposition: form-data; name=\"(.*?)\"; filename=\"(.*?)\"$", re.split("\r\n|\n", multipart_param)[0])
 								name = result[0][0]
 								filename = result[0][1]
-								params.set(name, {"filename": filename, "headers": {}})
+								params.set(name, {
+									"filename": filename,
+									"headers": {}
+								})
 							# name
 							elif re.match("^Content-Disposition: form-data; name=\".*?\"$", re.split("\r\n|\n", multipart_param)[0]):
 								result = re.findall("^Content-Disposition: form-data; name=\"(.*?)\"$", re.split("\r\n|\n", multipart_param)[0])

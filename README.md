@@ -1,4 +1,5 @@
 # TP-HTTP-Request-Response-Parser
+Parse the raw HTTP Request/ Response to the Object
 
 <p align="center">
     <a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/releases/"><img src="https://img.shields.io/github/release/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
@@ -15,6 +16,20 @@
 	<a href="https://www.buymeacoffee.com/truocphan" target="_blank"><img src="https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" height=30></a>
 </p>
 
+## Installation
+#### From PyPI:
+```console
+pip install TP-HTTP-Request-Response-Parser
+```
+#### From Source:
+```console
+git clone https://github.com/truocphan/TP-HTTP-Request-Response-Parser.git
+cd TP-HTTP-Request-Response-Parser
+python setup.py build
+python setup.py install
+```
+
+## Basic Usage
 ```
 from TP_HTTP_Request_Response_Parser import *
 
@@ -30,7 +45,7 @@ Cache-Control: max-age=0
 
 """
 
-# RequestParser = TP_HTTP_REQUEST_PARSER(open("request.txt", encoding="utf-8", errors="ignore").read())
+# RequestParser = TP_HTTP_REQUEST_PARSER(open("request.txt", "rb").read().decode("utf-8"))
 RequestParser = TP_HTTP_REQUEST_PARSER(rawRequest, ordered_dict=True)
 
 print("- request_method:", RequestParser.request_method)
@@ -60,7 +75,7 @@ X-Amz-Cf-Id: eKssgTNGDCswPiQtSYFD1MRNBJCTHEbnQp4MQjtQx2B4eM7oqXYIHg==
 
 {"ok":true,"promo":[]}"""
 
-# ResponseParser = TP_HTTP_RESPONSE_PARSER(open("response.txt", encoding="utf-8", errors="ignore").read())
+# ResponseParser = TP_HTTP_RESPONSE_PARSER(open("response.txt", "rb").read().decode("utf-8"))
 ResponseParser = TP_HTTP_RESPONSE_PARSER(rawResponse, ordered_dict=True)
 
 print("- response_statusCode:", ResponseParser.response_statusCode)

@@ -1,1 +1,1 @@
-json-duplicate-keys>=2023.10.22
+json-duplicate-keys>=2023.11.26

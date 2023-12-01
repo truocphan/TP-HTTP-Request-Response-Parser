@@ -1,5 +1,5 @@
 class TP_HTTP_REQUEST_PARSER:
-	def __init__(self, rawRequest, ordered_dict=False):
+	def __init__(self, rawRequest, separator="||", parse_index="$", dupSign_start="{{{", dupSign_end="}}}", ordered_dict=False):
 		import json_duplicate_keys as jdks
 		import re
 		import platform
@@ -24,15 +24,15 @@ class TP_HTTP_REQUEST_PARSER:
 		##
 
 		## Request Query ##
-		self.request_query = jdks.loads("{}", ordered_dict=ordered_dict)
+		self.request_query = jdks.loads("{}", dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 		try:
 			parse_query = urlparse(re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", rawRequest, 1)[0])[0].split(" ")[1]).query
 			if len(parse_query) > 0:
 				for param_query in parse_query.split("&"):
 					if len(re.split("=", param_query, 1)) == 2:
-						self.request_query.set(re.split("=", param_query, 1)[0], re.split("=", param_query, 1)[1])
+						self.request_query.set(re.split("=", param_query, 1)[0], re.split("=", param_query, 1)[1], separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 					else:
-						self.request_query.set(re.split("=", param_query, 1)[0], "")
+						self.request_query.set(re.split("=", param_query, 1)[0], "", separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 		except Exception as e:
 			pass
 		##
@@ -45,11 +45,11 @@ class TP_HTTP_REQUEST_PARSER:
 		##
 
 		## Request Headers ##
-		self.request_headers = jdks.loads("{}", ordered_dict=ordered_dict)
+		self.request_headers = jdks.loads("{}", dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 		try:
 			for header in re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", rawRequest, 1)[0])[1:]:
 				if re.match("^[^:]+: .*$", header):
-					self.request_headers.set(re.findall("^([^:]+): (.*)$", header)[0][0], re.findall("^([^:]+): (.*)$", header)[0][1])
+					self.request_headers.set(re.findall("^([^:]+): (.*)$", header)[0][0], re.findall("^([^:]+): (.*)$", header)[0][1], separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 		except Exception as e:
 			pass
 		##
@@ -59,7 +59,7 @@ class TP_HTTP_REQUEST_PARSER:
 			reqBody = re.split("\r\n\r\n|\n\n", rawRequest, 1)[1]
 			if len(reqBody) > 0:
 				# JSON Body
-				JDKSObject = jdks.loads(reqBody, ordered_dict=ordered_dict)
+				JDKSObject = jdks.loads(reqBody, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 				if JDKSObject:
 					self.request_body = jdks.JSON_DUPLICATE_KEYS({
 						"dataType": "json",
@@ -82,7 +82,7 @@ class TP_HTTP_REQUEST_PARSER:
 					boundary = re.split("\r\n|\n", reqBody)[0]
 
 					try:
-						params = jdks.loads("{}", ordered_dict=ordered_dict)
+						params = jdks.loads("{}", dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 
 						for multipart_param in re.split("(?:\r?\n)?"+boundary+"(?:--)?\r?\n", reqBody)[1:-1]:
 							# name , filename
@@ -90,23 +90,37 @@ class TP_HTTP_REQUEST_PARSER:
 								result = re.findall("^Content-Disposition: form-data; name=\"(.*?)\"; filename=\"(.*?)\"$", re.split("\r\n|\n", multipart_param)[0])
 								name = result[0][0]
 								filename = result[0][1]
+
+								if params.get(name, separator=separator, parse_index=parse_index) != "JSON_DUPLICATE_KEYS_ERROR":
+									i = 1
+									while params.get(name + dupSign_start + "_" + str(i) + "_" + dupSign_end, separator=separator, parse_index=parse_index) != "JSON_DUPLICATE_KEYS_ERROR":
+										i += 1
+									name = name + dupSign_start + "_" + str(i) + "_" + dupSign_end
+
 								params.set(name, {
 									"filename": filename,
 									"headers": {}
-								})
+								}, separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 							# name
 							elif re.match("^Content-Disposition: form-data; name=\".*?\"$", re.split("\r\n|\n", multipart_param)[0]):
 								result = re.findall("^Content-Disposition: form-data; name=\"(.*?)\"$", re.split("\r\n|\n", multipart_param)[0])
 								name = result[0]
-								params.set(name, {})
+
+								if params.get(name, separator=separator, parse_index=parse_index) != "JSON_DUPLICATE_KEYS_ERROR":
+									i = 1
+									while params.get(name + dupSign_start + "_" + str(i) + "_" + dupSign_end, separator=separator, parse_index=parse_index) != "JSON_DUPLICATE_KEYS_ERROR":
+										i += 1
+									name = name + dupSign_start + "_" + str(i) + "_" + dupSign_end
+
+								params.set(name, {}, separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 
 							# Headers
 							for h in re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", multipart_param, 1)[0])[1:]:
 								if re.match("^[^:]+: .*$", h):
-									params.set(name+"||headers||"+re.findall("^([^:]+): (.*)$", h)[0][0], re.findall("^([^:]+): (.*)$", h)[0][1])
+									params.set(name+"||headers||"+re.findall("^([^:]+): (.*)$", h)[0][0], re.findall("^([^:]+): (.*)$", h)[0][1], separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 
 							# Value
-							params.set(name+"||value", re.split("\r\n\r\n|\n\n", multipart_param, 1)[-1])
+							params.set(name+"||value", re.split("\r\n\r\n|\n\n", multipart_param, 1)[-1], separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 
 						self.request_body = jdks.JSON_DUPLICATE_KEYS({
 							"dataType": "multipart",
@@ -134,7 +148,7 @@ class TP_HTTP_REQUEST_PARSER:
 
 
 class TP_HTTP_RESPONSE_PARSER:
-	def __init__(self, rawResponse, ordered_dict=False):
+	def __init__(self, rawResponse, separator="||", parse_index="$", dupSign_start="{{{", dupSign_end="}}}", ordered_dict=False):
 		import json_duplicate_keys as jdks
 		import re
 
@@ -153,11 +167,11 @@ class TP_HTTP_RESPONSE_PARSER:
 		##
 
 		## Response Headers ##
-		self.response_headers = jdks.loads("{}", ordered_dict=ordered_dict)
+		self.response_headers = jdks.loads("{}", dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 		try:
 			for header in re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", rawResponse, 1)[0])[1:]:
 				if re.match("^[^:]+: .*$", header):
-					self.response_headers.set(re.findall("^([^:]+): (.*)$", header)[0][0], re.findall("^([^:]+): (.*)$", header)[0][1])
+					self.response_headers.set(re.findall("^([^:]+): (.*)$", header)[0][0], re.findall("^([^:]+): (.*)$", header)[0][1], separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 		except Exception as e:
 			pass
 		##
@@ -167,7 +181,7 @@ class TP_HTTP_RESPONSE_PARSER:
 			resBody = re.split("\r\n\r\n|\n\n", rawResponse, 1)[1]
 			if len(resBody) > 0:
 				# JSON Body
-				JDKSObject = jdks.loads(resBody, ordered_dict=ordered_dict)
+				JDKSObject = jdks.loads(resBody, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 				if JDKSObject:
 					self.response_body = jdks.JSON_DUPLICATE_KEYS({
 						"dataType": "json",

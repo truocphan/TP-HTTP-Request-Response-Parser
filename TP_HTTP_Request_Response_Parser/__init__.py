@@ -23,16 +23,26 @@ class TP_HTTP_REQUEST_PARSER:
 			self.request_path = None
 		##
 
+		## Request Path Param ##
+		self.request_pathParams = jdks.loads("{}", dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
+		if self.request_path is not None:
+			for path_split in self.request_path.split("/"):
+				if len(path_split) > 0 and re.match("^<(.+?)>$", path_split):
+					if self.request_pathParams.get(path_split) == "JSON_DUPLICATE_KEYS_ERROR":
+						self.request_pathParams.set(path_split, path_split[1:-1], separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
+
+		##
+
 		## Request Query ##
-		self.request_query = jdks.loads("{}", dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
+		self.request_queryParams = jdks.loads("{}", dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 		try:
 			parse_query = urlparse(re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", rawRequest, 1)[0])[0].split(" ")[1]).query
 			if len(parse_query) > 0:
 				for param_query in parse_query.split("&"):
 					if len(re.split("=", param_query, 1)) == 2:
-						self.request_query.set(re.split("=", param_query, 1)[0], re.split("=", param_query, 1)[1], separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
+						self.request_queryParams.set(re.split("=", param_query, 1)[0], re.split("=", param_query, 1)[1], separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 					else:
-						self.request_query.set(re.split("=", param_query, 1)[0], "", separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
+						self.request_queryParams.set(re.split("=", param_query, 1)[0], "", separator=separator, parse_index=parse_index, dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 		except Exception as e:
 			pass
 		##
@@ -42,6 +52,13 @@ class TP_HTTP_REQUEST_PARSER:
 			self.request_fragment = urlparse(re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", rawRequest, 1)[0])[0].split(" ")[1]).fragment
 		except Exception as e:
 			self.request_fragment = None
+		##
+
+		## Request HTTP Version ##
+		try:
+			self.request_httpVersion = re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", rawRequest, 1)[0])[0].split(" ")[2]
+		except Exception as e:
+			self.request_httpVersion = None
 		##
 
 		## Request Headers ##
@@ -152,6 +169,13 @@ class TP_HTTP_RESPONSE_PARSER:
 		import json_duplicate_keys as jdks
 		import re
 
+		## Response HTTP Version ##
+		try:
+			self.response_httpVersion = re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", rawResponse, 1)[0])[0].split(" ")[0]
+		except Exception as e:
+			self.response_httpVersion = None
+		##
+
 		## Response Status Code ##
 		try:
 			self.response_statusCode = int(re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", rawResponse, 1)[0])[0].split(" ")[1])
@@ -188,6 +212,7 @@ class TP_HTTP_RESPONSE_PARSER:
 						"data": JDKSObject.getObject()
 					})
 				else:
+
 					self.response_body = jdks.JSON_DUPLICATE_KEYS({
 						"dataType": "unknown",
 						"data": resBody

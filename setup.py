@@ -3,7 +3,7 @@ import datetime
 
 setuptools.setup(
 	name="TP-HTTP-Request-Response-Parser",
-	version="2023.12.1",
+	version=datetime.datetime.now().strftime("%Y.%m.%d"),
 	author="Truoc Phan",
 	license="MIT",
 	author_email="truocphan112017@gmail.com",

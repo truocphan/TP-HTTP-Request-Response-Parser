@@ -9,4 +9,4 @@
 
 ## Reporting a Vulnerability
 
-Please report security issues related to the `TP-HTTP-Request-Response-Parser` project to the following email address: truocphan112017@gmail.com
+Please report security issues related to the `TP-HTTP-Request-Response-Parser` project to the following email address: truocphan112017@gmail.com or tpcybersec2023@gmail.com

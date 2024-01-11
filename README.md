@@ -23,7 +23,7 @@ pip install TP-HTTP-Request-Response-Parser
 ```
 #### From Source:
 ```console
-git clone https://github.com/truocphan/TP-HTTP-Request-Response-Parser.git
+git clone https://github.com/truocphan/TP-HTTP-Request-Response-Parser.git --branch <Branch/Tag>
 cd TP-HTTP-Request-Response-Parser
 python setup.py build
 python setup.py install
@@ -48,12 +48,14 @@ Cache-Control: max-age=0
 # RequestParser = TP_HTTP_REQUEST_PARSER(open("request.txt", "rb").read().decode("utf-8"))
 RequestParser = TP_HTTP_REQUEST_PARSER(rawRequest, ordered_dict=True)
 
-print("- request_method:", RequestParser.request_method)
-print("- request_path:", RequestParser.request_path)
-print("- request_query:", RequestParser.request_query.dumps(indent=4))
-print("- request_fragment:", RequestParser.request_fragment)
-print("- request_headers:", RequestParser.request_headers.dumps(indent=4))
-print("- request_body:", RequestParser.request_body.dumps(indent=4))
+print("- request_method: {}".format(RequestParser.request_method))
+print("- request_path: {}".format(RequestParser.request_path))
+print("- request_pathParams: {}".format(RequestParser.request_pathParams.dumps(indent=4)))
+print("- request_queryParams: {}".format(RequestParser.request_queryParams.dumps(indent=4)))
+print("- request_fragment: {}".format(RequestParser.request_fragment))
+print("- request_httpVersion: {}".format(RequestParser.request_httpVersion))
+print("- request_headers: {}".format(RequestParser.request_headers.dumps(indent=4)))
+print("- request_body: {}".format(RequestParser.request_body.dumps(indent=4)))
 
 
 
@@ -78,8 +80,9 @@ X-Amz-Cf-Id: eKssgTNGDCswPiQtSYFD1MRNBJCTHEbnQp4MQjtQx2B4eM7oqXYIHg==
 # ResponseParser = TP_HTTP_RESPONSE_PARSER(open("response.txt", "rb").read().decode("utf-8"))
 ResponseParser = TP_HTTP_RESPONSE_PARSER(rawResponse, ordered_dict=True)
 
-print("- response_statusCode:", ResponseParser.response_statusCode)
-print("- response_statusText:", ResponseParser.response_statusText)
-print("- response_headers:", ResponseParser.response_headers.dumps(indent=4))
-print("- response_body:", ResponseParser.response_body.dumps(indent=4))
+print("- response_httpVersion: {}".format(ResponseParser.response_httpVersion))
+print("- response_statusCode: {}".format(ResponseParser.response_statusCode))
+print("- response_statusText: {}".format(ResponseParser.response_statusText))
+print("- response_headers: {}".format(ResponseParser.response_headers.dumps(indent=4)))
+print("- response_body: {}".format(ResponseParser.response_body.dumps(indent=4)))
 ```

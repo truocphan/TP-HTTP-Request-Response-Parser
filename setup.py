@@ -1,12 +1,11 @@
 import setuptools
-import datetime
 
 setuptools.setup(
 	name="TP-HTTP-Request-Response-Parser",
-	version="2024.1.11",
-	author="Truoc Phan",
+	version="2024.2.5",
+	author="TP Cyber Security",
 	license="MIT",
-	author_email="truocphan112017@gmail.com",
+	author_email="tpcybersec2023@gmail.com",
 	description="Parse the raw HTTP Request/ Response to the Object",
 	long_description=open("README.md").read(),
 	long_description_content_type="text/markdown",
@@ -17,6 +16,6 @@ setuptools.setup(
 		"Programming Language :: Python :: 2",
 		"Programming Language :: Python :: Implementation :: Jython"
 	],
-	keywords=["HTTP Request Parser", "HTTP Response Parser"],
+	keywords=["TPCyberSec", "HTTP Request Parser", "HTTP Response Parser"],
 	packages=["TP_HTTP_Request_Response_Parser"],
 )

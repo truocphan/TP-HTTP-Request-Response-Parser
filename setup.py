@@ -2,11 +2,11 @@ import setuptools
 
 setuptools.setup(
 	name="TP-HTTP-Request-Response-Parser",
-	version="2024.3.10",
+	version="2024.11.28",
 	author="TP Cyber Security",
 	license="MIT",
 	author_email="tpcybersec2023@gmail.com",
-	description="Parse the raw HTTP Request/ Response to the Object",
+	description="Parse/ Unparse the HTTP Request/ Response",
 	long_description=open("README.md").read(),
 	long_description_content_type="text/markdown",
 	install_requires=open("requirements.txt").read().split(),

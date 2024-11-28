@@ -1,5 +1,5 @@
-# TP-HTTP-Request-Response-Parser
-Parse the raw HTTP Request/ Response to the Object
+# TP-HTTP-Request-Response-Parser - PyPI
+Parse/ Unparse the HTTP Request/ Response
 
 <p align="center">
     <a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/releases/"><img src="https://img.shields.io/github/release/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
@@ -8,12 +8,6 @@ Parse the raw HTTP Request/ Response to the Object
 	<a href="#"><img src="https://img.shields.io/github/forks/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
 	<a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/issues?q=is%3Aopen+is%3Aissue"><img src="https://img.shields.io/github/issues/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
 	<a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
-	<a href="https://pypi.org/project/TP-HTTP-Request-Response-Parser/" target="_blank"><img src="https://img.shields.io/badge/pypi-3775A9?style=for-the-badge&logo=pypi&logoColor=white" height=30></a>
-	<a href="https://www.facebook.com/61550595106970" target="_blank"><img src="https://img.shields.io/badge/Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white" height=30></a>
-	<a href="https://twitter.com/TPCyberSec" target="_blank"><img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" height=30></a>
-	<a href="https://github.com/truocphan" target="_blank"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" height=30></a>
-	<a href="mailto:tpcybersec2023@gmail.com" target="_blank"><img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" height=30></a>
-	<a href="https://www.buymeacoffee.com/truocphan" target="_blank"><img src="https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" height=30></a>
 </p>
 
 ## Installation
@@ -45,7 +39,7 @@ Cache-Control: max-age=0
 
 """
 
-# RequestParser = TP_HTTP_REQUEST_PARSER(open("request.txt", "rb").read().decode("utf-8"))
+# RequestParser = TP_HTTP_REQUEST_PARSER(open("request.txt", encoding="utf-8", errors="ignore").read()
 RequestParser = TP_HTTP_REQUEST_PARSER(rawRequest, ordered_dict=True)
 
 print("- request_method: {}".format(RequestParser.request_method))
@@ -56,6 +50,7 @@ print("- request_fragment: {}".format(RequestParser.request_fragment))
 print("- request_httpVersion: {}".format(RequestParser.request_httpVersion))
 print("- request_headers: {}".format(RequestParser.request_headers.dumps(indent=4)))
 print("- request_body: {}".format(RequestParser.request_body.dumps(indent=4)))
+print(RequestParser.unparse(update_content_length=True))
 
 
 
@@ -77,7 +72,7 @@ X-Amz-Cf-Id: eKssgTNGDCswPiQtSYFD1MRNBJCTHEbnQp4MQjtQx2B4eM7oqXYIHg==
 
 {"ok":true,"promo":[]}"""
 
-# ResponseParser = TP_HTTP_RESPONSE_PARSER(open("response.txt", "rb").read().decode("utf-8"))
+# ResponseParser = TP_HTTP_RESPONSE_PARSER(open("response.txt", encoding="utf-8", errors="ignore").read())
 ResponseParser = TP_HTTP_RESPONSE_PARSER(rawResponse, ordered_dict=True)
 
 print("- response_httpVersion: {}".format(ResponseParser.response_httpVersion))
@@ -85,4 +80,5 @@ print("- response_statusCode: {}".format(ResponseParser.response_statusCode))
 print("- response_statusText: {}".format(ResponseParser.response_statusText))
 print("- response_headers: {}".format(ResponseParser.response_headers.dumps(indent=4)))
 print("- response_body: {}".format(ResponseParser.response_body.dumps(indent=4)))
+print(ResponseParser.unparse(update_content_length=True))
 ```

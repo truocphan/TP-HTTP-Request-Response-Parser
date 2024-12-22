@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
 	name="TP-HTTP-Request-Response-Parser",
-	version="2024.11.28",
+	version="2024.12.22",
 	author="TP Cyber Security",
 	license="MIT",
 	author_email="tpcybersec2023@gmail.com",

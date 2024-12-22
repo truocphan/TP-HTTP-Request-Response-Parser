@@ -2,12 +2,15 @@
 Parse/ Unparse the HTTP Request/ Response
 
 <p align="center">
-    <a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/releases/"><img src="https://img.shields.io/github/release/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/releases/"><img src="https://img.shields.io/github/release/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
 	<a href="#"><img src="https://img.shields.io/github/downloads/truocphan/TP-HTTP-Request-Response-Parser/total" height=30></a>
 	<a href="#"><img src="https://img.shields.io/github/stars/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
 	<a href="#"><img src="https://img.shields.io/github/forks/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
 	<a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/issues?q=is%3Aopen+is%3Aissue"><img src="https://img.shields.io/github/issues/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
 	<a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
+	<br>
+	<a href="#"><img src="https://img.shields.io/pypi/v/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="#"><img src="https://img.shields.io/pypi/dm/TP-HTTP-Request-Response-Parser" height=30></a>
 </p>
 
 ## Installation
@@ -25,7 +28,7 @@ python setup.py install
 
 ## Basic Usage
 ```
-from TP_HTTP_Request_Response_Parser import *
+from TP_HTTP_Request_Response_Parser import TP_HTTP_REQUEST_PARSER, TP_HTTP_RESPONSE_PARSER
 
 # Parsing HTTP Request
 rawRequest = """GET /v1/promo/extension HTTP/2
@@ -49,6 +52,7 @@ print("- request_queryParams: {}".format(RequestParser.request_queryParams.dumps
 print("- request_fragment: {}".format(RequestParser.request_fragment))
 print("- request_httpVersion: {}".format(RequestParser.request_httpVersion))
 print("- request_headers: {}".format(RequestParser.request_headers.dumps(indent=4)))
+print("- request_cookies: {}".format(RequestParser.request_cookies.dumps(indent=4)))
 print("- request_body: {}".format(RequestParser.request_body.dumps(indent=4)))
 print(RequestParser.unparse(update_content_length=True))
 
@@ -79,6 +83,7 @@ print("- response_httpVersion: {}".format(ResponseParser.response_httpVersion))
 print("- response_statusCode: {}".format(ResponseParser.response_statusCode))
 print("- response_statusText: {}".format(ResponseParser.response_statusText))
 print("- response_headers: {}".format(ResponseParser.response_headers.dumps(indent=4)))
+print("- response_cookies: {}".format(ResponseParser.response_cookies.dumps(indent=4)))
 print("- response_body: {}".format(ResponseParser.response_body.dumps(indent=4)))
 print(ResponseParser.unparse(update_content_length=True))
 ```

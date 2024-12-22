@@ -13,8 +13,9 @@ else:
 	from urlparse import urlparse
 	from urllib import quote as urlencode, unquote as urldecode
 
+
 class TP_HTTP_REQUEST_PARSER:
-	def __init__(self, rawRequest, separator="||", parse_index="$", dupSign_start="{{{", dupSign_end="}}}", ordered_dict=False):
+	def __init__(self, rawRequest:str, separator:str="||", parse_index:str="$", dupSign_start:str="{{{", dupSign_end:str="}}}", ordered_dict:bool=False) -> None:
 		## Request Method ##
 		try:
 			self.request_method = re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", rawRequest, 1)[0])[0].split(" ")[0]
@@ -34,8 +35,7 @@ class TP_HTTP_REQUEST_PARSER:
 		if len(self.request_path) > 0:
 			for path_split in self.request_path.split("/"):
 				if len(path_split) > 0 and re.match("^<(.+?)>$", path_split):
-					if self.request_pathParams.get(path_split)["value"] == "JSON_DUPLICATE_KEYS_ERROR":
-						self.request_pathParams.set(path_split, path_split[1:-1])
+					self.request_pathParams.update(path_split, path_split[1:-1], allow_new_key=True)
 		##
 
 		## Request Query ##
@@ -75,13 +75,27 @@ class TP_HTTP_REQUEST_PARSER:
 		try:
 			for header in re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", rawRequest, 1)[0])[1:]:
 				if re.match("^[^:]+: .*$", header):
-					JDKSObject = jdks.loads(urldecode(re.findall("^([^:]+): (.*)$", header)[0][1]), dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
+					JDKSObject = jdks.loads(re.findall("^([^:]+): (.*)$", header)[0][1], dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 					if JDKSObject:
 						self.request_headers.set(re.findall("^([^:]+): (.*)$", header)[0][0], JDKSObject.getObject())
 					else:
 						self.request_headers.set(re.findall("^([^:]+): (.*)$", header)[0][0], re.findall("^([^:]+): (.*)$", header)[0][1])
 		except Exception as e:
 			pass
+		##
+
+		## Request Cookies ##
+		self.request_cookies = jdks.loads("{}", ordered_dict=ordered_dict)
+		if self.request_headers.get("Cookie", case_insensitive=True)["value"] != "JSON_DUPLICATE_KEYS_ERROR":
+			for cookie in self.request_headers.get("Cookie", case_insensitive=True)["value"].split(";"):
+				if len(cookie.split("=", 1)) == 2:
+					JDKSObject = jdks.loads(cookie.split("=", 1)[1].strip(), dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
+					if JDKSObject:
+						self.request_cookies.set(cookie.split("=", 1)[0].strip(), JDKSObject.getObject())
+					else:
+						self.request_cookies.set(cookie.split("=", 1)[0].strip(), cookie.split("=", 1)[1].strip())
+				else:
+					self.request_cookies.set(cookie.split("=", 1)[0].strip(), "")
 		##
 
 		## Request Body ##
@@ -194,9 +208,9 @@ class TP_HTTP_REQUEST_PARSER:
 			self.request_body = jdks.JSON_DUPLICATE_KEYS({"dataType": None, "data": None})
 		##
 
-	def unparse(self, update_content_length=False):
+	def unparse(self, update_content_length:bool=False) -> str:
 		rawRequest = "{method} {path}{queryParams}{fragment} {httpVersion}{headers}\r\n\r\n{body}"
-		method = path = queryParams = fragment = httpVersion = headers = body = ""
+		method = path = queryParams = fragment = httpVersion = headers = cookies = body = ""
 
 		if type(self.request_method) in [unicode, str]:
 			method = self.request_method
@@ -220,7 +234,7 @@ class TP_HTTP_REQUEST_PARSER:
 					if type(k) in [unicode, str]:
 						Jget = self.request_queryParams.get(k)
 						if type(Jget["value"]) in [OrderedDict, dict, list]:
-							query.append("{key}={value}".format(key=jdks.normalize_key(k), value=jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(separators=(",",":"))))
+							query.append("{key}={value}".format(key=jdks.normalize_key(k), value=urlencode(jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(separators=(",",":")))))
 						elif type(Jget["value"]) in [unicode, str]:
 							query.append("{key}={value}".format(key=jdks.normalize_key(k), value=Jget["value"]))
 						else:
@@ -230,8 +244,8 @@ class TP_HTTP_REQUEST_PARSER:
 			pass
 		if len(queryParams) > 0: queryParams = "?"+queryParams
 
-		if type(self.request_fragment) in [unicode, str]:
-			fragment = self.request_fragment
+		if type(self.request_fragment) in [unicode, str] and len(self.request_fragment) > 0:
+			fragment = "#"+self.request_fragment
 
 		if type(self.request_httpVersion) in [unicode, str]:
 			httpVersion = self.request_httpVersion
@@ -272,7 +286,7 @@ class TP_HTTP_REQUEST_PARSER:
 					for k in Jget_data["value"]:
 						if type(k) in [unicode, str]:
 							if type(Jget_data["value"][k]) in [OrderedDict, dict, list]:
-								body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k), value=jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][k]).dumps()))
+								body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k), value=jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][k]).dumps(separators=(",",":"))))
 							elif type(Jget_data["value"][k]) in [unicode, str]:
 								body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k), value=Jget_data["value"][k]))
 							else:
@@ -284,11 +298,24 @@ class TP_HTTP_REQUEST_PARSER:
 			pass
 
 		if update_content_length:
-			Jget = self.request_headers.get("Content-Length", case_insensitive=True)
-			if Jget["value"] == "JSON_DUPLICATE_KEYS_ERROR":
-				self.request_headers.set("Content-Length", len(body))
-			else:
-				self.request_headers.update(Jget["name"], len(body))
+			self.request_headers.update("Content-Length", len(body), allow_new_key=True, case_insensitive=True)
+
+		try:
+			if type(self.request_cookies) == jdks.JSON_DUPLICATE_KEYS or ("__module__" in dir(self.request_cookies) and self.request_cookies.__module__ == "json_duplicate_keys"):
+				for k in self.request_cookies.getObject():
+					if type(k) in [unicode, str]:
+						Jget = self.request_cookies.get(k)
+						if type(Jget["value"]) in [OrderedDict, dict, list]:
+							cookies += "{key}={value}; ".format(key=jdks.normalize_key(k), value=jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(separators=(",",":")))
+						elif type(Jget["value"]) in [unicode, str]:
+							cookies += "{key}={value}; ".format(key=jdks.normalize_key(k), value=Jget["value"])
+						else:
+							cookies += "{key}={value}; ".format(key=jdks.normalize_key(k), value=str(Jget["value"]))
+
+				if len(cookies) > 0:
+					self.request_headers.update("Cookie", cookies[:-2], allow_new_key=True, case_insensitive=True)
+		except Exception as e:
+			pass
 
 		try:
 			if type(self.request_headers) == jdks.JSON_DUPLICATE_KEYS or ("__module__" in dir(self.request_headers) and self.request_headers.__module__ == "json_duplicate_keys"):
@@ -296,7 +323,7 @@ class TP_HTTP_REQUEST_PARSER:
 					if type(k) in [unicode, str]:
 						Jget = self.request_headers.get(k)
 						if type(Jget["value"]) in [OrderedDict, dict, list]:
-							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps())
+							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(separators=(",",":")))
 						elif type(Jget["value"]) in [unicode, str]:
 							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=Jget["value"])
 						else:
@@ -310,7 +337,7 @@ class TP_HTTP_REQUEST_PARSER:
 
 
 class TP_HTTP_RESPONSE_PARSER:
-	def __init__(self, rawResponse, separator="||", parse_index="$", dupSign_start="{{{", dupSign_end="}}}", ordered_dict=False):
+	def __init__(self, rawResponse:str, separator:str="||", parse_index:str="$", dupSign_start:str="{{{", dupSign_end:str="}}}", ordered_dict:bool=False) -> None:
 		## Response HTTP Version ##
 		try:
 			self.response_httpVersion = re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", rawResponse, 1)[0])[0].split(" ")[0]
@@ -337,13 +364,27 @@ class TP_HTTP_RESPONSE_PARSER:
 		try:
 			for header in re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", rawResponse, 1)[0])[1:]:
 				if re.match("^[^:]+: .*$", header):
-					JDKSObject = jdks.loads(urldecode(re.findall("^([^:]+): (.*)$", header)[0][1]), dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
+					JDKSObject = jdks.loads(re.findall("^([^:]+): (.*)$", header)[0][1], dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
 					if JDKSObject:
 						self.response_headers.set(re.findall("^([^:]+): (.*)$", header)[0][0], JDKSObject.getObject())
 					else:
 						self.response_headers.set(re.findall("^([^:]+): (.*)$", header)[0][0], re.findall("^([^:]+): (.*)$", header)[0][1])
 		except Exception as e:
 			pass
+		##
+
+		## Response Cookies ##
+		self.response_cookies = jdks.loads("{}", ordered_dict=ordered_dict)
+		for k,v in self.response_headers.filter_keys("Set-Cookie", ordered_dict=True).getObject().items():
+			cookie = v.split(";")[0]
+			if len(cookie.split("=", 1)) == 2:
+				value = jdks.loads(cookie.split("=", 1)[1].strip(), dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
+				if value:
+					self.response_cookies.set(cookie.split("=", 1)[0].strip(), value.getObject())
+				else:
+					self.response_cookies.set(cookie.split("=", 1)[0].strip(), cookie.split("=", 1)[1].strip())
+			else:
+				self.response_cookies.set(cookie.split("=", 1)[0].strip(), "")
 		##
 
 		## Response Body ##
@@ -370,7 +411,7 @@ class TP_HTTP_RESPONSE_PARSER:
 			self.response_body = jdks.JSON_DUPLICATE_KEYS({"dataType": None, "data": None})
 		##
 
-	def unparse(self, update_content_length=False):
+	def unparse(self, update_content_length:bool=False) -> str:
 		rawResponse = "{httpVersion} {statusCode} {statusText}{headers}\r\n\r\n{body}"
 		httpVersion = statusCode = statusText = headers = body = ""
 
@@ -393,11 +434,7 @@ class TP_HTTP_RESPONSE_PARSER:
 			pass
 
 		if update_content_length:
-			Jget = self.response_headers.get("Content-Length", case_insensitive=True)
-			if Jget["value"] == "JSON_DUPLICATE_KEYS_ERROR":
-				self.response_headers.set("Content-Length", len(body))
-			else:
-				self.response_headers.update(Jget["name"], len(body))
+			self.response_headers.update("Content-Length", len(body), allow_new_key=True, case_insensitive=True)
 
 		try:
 			if type(self.response_headers) == jdks.JSON_DUPLICATE_KEYS or ("__module__" in dir(self.response_headers) and self.response_headers.__module__ == "json_duplicate_keys"):
@@ -405,7 +442,7 @@ class TP_HTTP_RESPONSE_PARSER:
 					if type(k) in [unicode, str]:
 						Jget = self.response_headers.get(k)
 						if type(Jget["value"]) in [OrderedDict, dict, list]:
-							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps())
+							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(separators=(",",":")))
 						elif type(Jget["value"]) in [unicode, str]:
 							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=Jget["value"])
 						else:
